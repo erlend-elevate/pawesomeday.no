@@ -1,0 +1,329 @@
+{%- comment -%}
+  templates/page.17mai-rabatt.liquid
+
+  17. mai kundeklubb-rabatt landingsside.
+  Strukturen er gjenbrukbar for fremtidige kampanjer (Black Week, påske, sommer):
+  endre Liquid-variablene under for ny kode, prosent, datoer, collections og produkter.
+
+  Krever:
+   * assets/page-17mai-rabatt.css uploaded til tema-assets
+   * Page med handle 17mai-rabatt opprettet i Shopify Admin (Pages)
+   * Discount-koden 17MAI opprettet med 17 % og collection-restriksjon på de to handles
+{%- endcomment -%}
+
+{%- liquid
+  assign campaign_code = '17MAI'
+  assign campaign_percent_text = '17 %'
+  assign campaign_deadline_text = 'til og med 17. mai'
+  assign campaign_eyebrow = 'KUNDEKLUBB-EKSKLUSIVT'
+
+  assign tygg_handle = 'alt-av-tygg'
+  assign tygg_count = 21
+  assign hjernetrim_handle = 'alle-hjernetrims-og-aktiviseringsleker'
+  assign hjernetrim_count = 67
+  assign hjernetrim_query = '?filter.v.availability=1'
+
+  assign featured_handles_str = 'frysetorket-okse-pizzle-naturlig-og-langvarig-tygg-til-hund,pawesomeday-slowfeeder-slowfeeder-til-hund,hjerte-slowfeeder-lickmat'
+  assign featured_handles = featured_handles_str | split: ','
+
+  assign tygg_path = '/collections/' | append: tygg_handle
+  assign hjernetrim_path = '/collections/' | append: hjernetrim_handle | append: hjernetrim_query
+
+  assign tygg_redirect = tygg_path | url_encode
+  assign hjernetrim_redirect = hjernetrim_path | url_encode
+
+  assign tygg_cta = '/discount/' | append: campaign_code | append: '?redirect=' | append: tygg_redirect
+  assign hjernetrim_cta = '/discount/' | append: campaign_code | append: '?redirect=' | append: hjernetrim_redirect
+
+  assign market_handle = localization.market.handle | default: ''
+  assign foreign_markets = 'sweden,eu' | split: ','
+  assign foreign_market = false
+  if foreign_markets contains market_handle
+    assign foreign_market = true
+  endif
+-%}
+
+{{ 'page-17mai-rabatt.css' | asset_url | stylesheet_tag }}
+
+<div class="pmd-page">
+
+{%- if foreign_market -%}
+
+  <section class="pmd-market-block">
+    <div class="pmd-container">
+      <p class="pmd-eyebrow">{{ campaign_eyebrow }}</p>
+      <h1 class="pmd-h1">Denne kampanjen gjelder kun i Norge</h1>
+      <p class="pmd-lead">Koden 17MAI er forbeholdt det norske markedet. Bla gjennom resten av utvalget vårt.</p>
+      <div class="pmd-cta-row" style="justify-content:center;">
+        <a href="/collections/all" class="pmd-btn pmd-btn--primary">Se alle produkter</a>
+      </div>
+    </div>
+  </section>
+
+{%- else -%}
+
+  {%- comment -%} 1. HERO {%- endcomment -%}
+  <section class="pmd-section pmd-hero">
+    <div class="pmd-container">
+      <p class="pmd-eyebrow">{{ campaign_eyebrow }}</p>
+      <h1 class="pmd-h1">En liten gave til kundeklubben</h1>
+      <p class="pmd-lead" style="margin-left:auto;margin-right:auto;">Som takk til alle som følger oss på e-post gir vi <span class="pmd-hero__highlight">17&nbsp;%</span> rabatt på tygg og hjernetrim. Bruk koden under i kassen.</p>
+
+      <div class="pmd-code-box" role="group" aria-label="Rabattkode">
+        <span class="pmd-code-box__code">{{ campaign_code }}</span>
+        <button type="button" class="pmd-code-box__btn" data-pmd-copy="{{ campaign_code }}" aria-label="Kopier rabattkoden {{ campaign_code }}">Kopier</button>
+      </div>
+      <p class="pmd-deadline">Gyldig {{ campaign_deadline_text }}</p>
+
+      <div class="pmd-cta-row" style="justify-content:center;">
+        <a href="{{ tygg_cta }}" class="pmd-btn pmd-btn--primary">Se alt av tygg</a>
+        <a href="{{ hjernetrim_cta }}" class="pmd-btn pmd-btn--secondary">Se hjernetrim</a>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} 2. SLIK BRUKER DU KODEN {%- endcomment -%}
+  <section class="pmd-section pmd-section--soft pmd-section--center">
+    <div class="pmd-container">
+      <h2 class="pmd-h2">Slik bruker du koden</h2>
+      <p class="pmd-lead">Tre raske trinn fra valg til levering.</p>
+
+      <div class="pmd-steps">
+        <div class="pmd-step">
+          <p class="pmd-step__num">01</p>
+          <h3 class="pmd-step__title">Velg fra tygg eller hjernetrim</h3>
+          <p class="pmd-step__body">Bla gjennom utvalget og legg favorittene i handlekurven.</p>
+        </div>
+        <div class="pmd-step">
+          <p class="pmd-step__num">02</p>
+          <h3 class="pmd-step__title">Skriv inn koden {{ campaign_code }}</h3>
+          <p class="pmd-step__body">I kassen finner du et felt for rabattkode. Skriv inn {{ campaign_code }} og trykk bruk.</p>
+        </div>
+        <div class="pmd-step">
+          <p class="pmd-step__num">03</p>
+          <h3 class="pmd-step__title">Bestill innen 17. mai</h3>
+          <p class="pmd-step__body">Bestillinger lagt inn etter midnatt 17. mai får ikke rabatten.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} 3. FEATURED PRODUKTER {%- endcomment -%}
+  <section class="pmd-section pmd-section--center">
+    <div class="pmd-container">
+      <h2 class="pmd-h2">Tre favoritter til dagen</h2>
+      <p class="pmd-lead">Fra utvalget som er med i kampanjen.</p>
+
+      <div class="pmd-products">
+        {%- for handle in featured_handles -%}
+          {%- assign p = all_products[handle] -%}
+          {%- if p != empty and p.available -%}
+            <a href="{{ p.url }}" class="pmd-product">
+              <div class="pmd-product__media">
+                {%- assign img = p.featured_media.preview_image -%}
+                {%- if img -%}
+                  <img
+                    src="{{ img | image_url: width: 800 }}"
+                    srcset="{{ img | image_url: width: 400 }} 400w, {{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 800 }} 800w, {{ img | image_url: width: 1200 }} 1200w"
+                    sizes="(min-width: 990px) 360px, (min-width: 750px) 33vw, calc(100vw - 32px)"
+                    alt="{{ img.alt | default: p.title | escape }}"
+                    loading="lazy"
+                    width="{{ img.width }}"
+                    height="{{ img.height }}"
+                    class="pmd-product__img">
+                {%- endif -%}
+              </div>
+              <div class="pmd-product__body">
+                <h3 class="pmd-product__title">{{ p.title }}</h3>
+                <p class="pmd-product__price">{{ p.price | money }}</p>
+                <p class="pmd-product__discount-note">17&nbsp;% rabatt med koden {{ campaign_code }}</p>
+              </div>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} 4. TYGG-BLOKK {%- endcomment -%}
+  <section class="pmd-section pmd-section--soft">
+    <div class="pmd-container">
+      <div class="pmd-collection-block">
+        <div class="pmd-collection-block__text">
+          <h2 class="pmd-h2">Alt av tygg, <span class="pmd-hero__highlight">17&nbsp;%</span> rabatt</h2>
+          <p class="pmd-lead">Naturlige tygg gir hunden noe meningsfullt å holde på med. De kan bidra til en roligere hverdag og er gode å ha til lengre stunder alene. I kategorien finner du alt fra korte godbiter til langvarige biter med vom og naturlige materialer.</p>
+          <div class="pmd-cta-row">
+            <a href="{{ tygg_cta }}" class="pmd-btn pmd-btn--primary">Se alle {{ tygg_count }} tygg</a>
+          </div>
+        </div>
+        <div class="pmd-collection-block__media">
+          {%- assign tygg_collection = collections[tygg_handle] -%}
+          {%- if tygg_collection.image -%}
+            <img
+              src="{{ tygg_collection.image | image_url: width: 900 }}"
+              srcset="{{ tygg_collection.image | image_url: width: 600 }} 600w, {{ tygg_collection.image | image_url: width: 900 }} 900w, {{ tygg_collection.image | image_url: width: 1200 }} 1200w"
+              sizes="(min-width: 990px) 50vw, calc(100vw - 32px)"
+              alt="{{ tygg_collection.image.alt | default: 'Tygg til hund' | escape }}"
+              loading="lazy"
+              width="{{ tygg_collection.image.width }}"
+              height="{{ tygg_collection.image.height }}"
+              class="pmd-product__img">
+          {%- elsif tygg_collection.products.first.featured_media.preview_image -%}
+            {%- assign timg = tygg_collection.products.first.featured_media.preview_image -%}
+            <img
+              src="{{ timg | image_url: width: 900 }}"
+              srcset="{{ timg | image_url: width: 600 }} 600w, {{ timg | image_url: width: 900 }} 900w, {{ timg | image_url: width: 1200 }} 1200w"
+              sizes="(min-width: 990px) 50vw, calc(100vw - 32px)"
+              alt="{{ timg.alt | default: 'Tygg til hund' | escape }}"
+              loading="lazy"
+              width="{{ timg.width }}"
+              height="{{ timg.height }}"
+              class="pmd-product__img">
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} 5. HJERNETRIM-BLOKK {%- endcomment -%}
+  <section class="pmd-section">
+    <div class="pmd-container">
+      <div class="pmd-collection-block pmd-collection-block--reverse">
+        <div class="pmd-collection-block__text">
+          <h2 class="pmd-h2">Hjernetrim som virker</h2>
+          <p class="pmd-lead">Mental aktivisering tretter hunden minst like mye som en lang tur. Med slowfeedere, snusematter og puslespill kan du gjøre måltider og fritid til en liten utfordring som passer hver enkelt hund.</p>
+          <div class="pmd-cta-row">
+            <a href="{{ hjernetrim_cta }}" class="pmd-btn pmd-btn--primary">Se alle {{ hjernetrim_count }} hjernetrim</a>
+          </div>
+        </div>
+        <div class="pmd-collection-block__media">
+          {%- assign hjernetrim_collection = collections[hjernetrim_handle] -%}
+          {%- if hjernetrim_collection.image -%}
+            <img
+              src="{{ hjernetrim_collection.image | image_url: width: 900 }}"
+              srcset="{{ hjernetrim_collection.image | image_url: width: 600 }} 600w, {{ hjernetrim_collection.image | image_url: width: 900 }} 900w, {{ hjernetrim_collection.image | image_url: width: 1200 }} 1200w"
+              sizes="(min-width: 990px) 50vw, calc(100vw - 32px)"
+              alt="{{ hjernetrim_collection.image.alt | default: 'Hjernetrim til hund' | escape }}"
+              loading="lazy"
+              width="{{ hjernetrim_collection.image.width }}"
+              height="{{ hjernetrim_collection.image.height }}"
+              class="pmd-product__img">
+          {%- elsif hjernetrim_collection.products.first.featured_media.preview_image -%}
+            {%- assign himg = hjernetrim_collection.products.first.featured_media.preview_image -%}
+            <img
+              src="{{ himg | image_url: width: 900 }}"
+              srcset="{{ himg | image_url: width: 600 }} 600w, {{ himg | image_url: width: 900 }} 900w, {{ himg | image_url: width: 1200 }} 1200w"
+              sizes="(min-width: 990px) 50vw, calc(100vw - 32px)"
+              alt="{{ himg.alt | default: 'Hjernetrim til hund' | escape }}"
+              loading="lazy"
+              width="{{ himg.width }}"
+              height="{{ himg.height }}"
+              class="pmd-product__img">
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} 6. FAQ {%- endcomment -%}
+  <section class="pmd-section pmd-section--soft pmd-section--center">
+    <div class="pmd-container">
+      <h2 class="pmd-h2">Vanlige spørsmål</h2>
+
+      <div class="pmd-faq" style="text-align:left;">
+        <details class="pmd-faq__item">
+          <summary>Hvor lenge gjelder koden?</summary>
+          <p class="pmd-faq__answer">Koden {{ campaign_code }} er gyldig {{ campaign_deadline_text }}. Bestillinger som legges inn etter midnatt 17. mai får ikke rabatten.</p>
+        </details>
+
+        <details class="pmd-faq__item">
+          <summary>Hvilke produkter er inkludert?</summary>
+          <p class="pmd-faq__answer">Rabatten gjelder hele utvalget i kategoriene tygg og hjernetrim. Den gjelder ikke andre kategorier som fôr eller pleie.</p>
+        </details>
+
+        <details class="pmd-faq__item">
+          <summary>Kan koden kombineres med andre rabatter?</summary>
+          <p class="pmd-faq__answer">Nei, koden {{ campaign_code }} kan ikke kombineres med andre aktive rabattkoder eller pågående salg. Du får automatisk den beste prisen i kassen.</p>
+        </details>
+
+        <details class="pmd-faq__item">
+          <summary>Hvor raskt kommer pakken?</summary>
+          <p class="pmd-faq__answer">Vi sender vanligvis innen 1 til 2 virkedager. Bestiller du innen 14. mai er du sikret levering før 17. mai til de fleste norske adresser.</p>
+        </details>
+
+        <details class="pmd-faq__item">
+          <summary>Hva hvis pakken ikke rekker frem til 17. mai?</summary>
+          <p class="pmd-faq__answer">Du får rabatten uansett, og pakken kommer så snart vi har sendt den. Vi anbefaler å bestille innen 14. mai for å være sikker på levering før 17. mai.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} 7. AVSLUTTENDE TAKK {%- endcomment -%}
+  <section class="pmd-section pmd-section--dark pmd-section--center">
+    <div class="pmd-container">
+      <p class="pmd-eyebrow">{{ campaign_eyebrow }}</p>
+      <h2 class="pmd-h2">Takk for at du er med oss</h2>
+      <p class="pmd-lead">Bruk koden under i kassen, gyldig {{ campaign_deadline_text }}.</p>
+
+      <div class="pmd-code-box" role="group" aria-label="Rabattkode">
+        <span class="pmd-code-box__code">{{ campaign_code }}</span>
+        <button type="button" class="pmd-code-box__btn" data-pmd-copy="{{ campaign_code }}" aria-label="Kopier rabattkoden {{ campaign_code }}">Kopier</button>
+      </div>
+
+      <div class="pmd-cta-row" style="justify-content:center;margin-top:8px;">
+        <a href="{{ tygg_cta }}" class="pmd-btn pmd-btn--primary">Handle nå</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      var buttons = document.querySelectorAll('[data-pmd-copy]');
+      if (!buttons.length) return;
+
+      function legacyCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        return ok;
+      }
+
+      function flashSuccess(btn) {
+        var original = btn.textContent;
+        btn.textContent = 'Kopiert';
+        btn.setAttribute('data-pmd-copied', 'true');
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.removeAttribute('data-pmd-copied');
+        }, 2000);
+      }
+
+      Array.prototype.forEach.call(buttons, function (btn) {
+        btn.addEventListener('click', function () {
+          var code = btn.getAttribute('data-pmd-copy');
+          if (!code) return;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code).then(function () {
+              flashSuccess(btn);
+            }, function () {
+              if (legacyCopy(code)) flashSuccess(btn);
+            });
+          } else if (legacyCopy(code)) {
+            flashSuccess(btn);
+          }
+        });
+      });
+    })();
+  </script>
+
+{%- endif -%}
+
+</div>

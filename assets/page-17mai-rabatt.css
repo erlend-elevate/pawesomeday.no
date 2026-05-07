@@ -1,0 +1,426 @@
+/* Pawesomeday, 17. mai kundeklubb-rabatt landingsside.
+   Skopet til templatets root via .pmd-page for å unngå kollisjon med tema-CSS. */
+
+.pmd-page {
+  --pmd-bg: #FFFFFF;
+  --pmd-text: #000000;
+  --pmd-btn-bg: #111111;
+  --pmd-btn-text: #FFFFFF;
+  --pmd-border: #E8E8E1;
+  --pmd-sale: #C20000;
+  --pmd-bg-soft: #F8F7F3;
+  --pmd-container: 1200px;
+
+  color: var(--pmd-text);
+  background: var(--pmd-bg);
+  font-family: 'Fahkwang', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pmd-page * {
+  box-sizing: border-box;
+}
+
+.pmd-container {
+  max-width: var(--pmd-container);
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 750px) {
+  .pmd-container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+.pmd-section {
+  padding-top: clamp(48px, 8vw, 96px);
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.pmd-section--soft {
+  background: var(--pmd-bg-soft);
+}
+
+.pmd-section--dark {
+  background: var(--pmd-btn-bg);
+  color: var(--pmd-btn-text);
+}
+
+.pmd-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin: 0 0 16px;
+}
+
+.pmd-h1 {
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 300;
+  letter-spacing: 0.025em;
+  line-height: 1.15;
+  margin: 0 0 20px;
+}
+
+.pmd-h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 300;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+  margin: 0 0 16px;
+}
+
+.pmd-h3 {
+  font-size: clamp(20px, 2.5vw, 26px);
+  font-weight: 300;
+  letter-spacing: 0.025em;
+  line-height: 1.3;
+  margin: 0 0 12px;
+}
+
+.pmd-lead {
+  font-size: clamp(15px, 1.6vw, 17px);
+  margin: 0 0 24px;
+  max-width: 60ch;
+}
+
+.pmd-section--center {
+  text-align: center;
+}
+.pmd-section--center .pmd-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Knapper */
+.pmd-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--pmd-btn-bg);
+  border-radius: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  line-height: 1.2;
+}
+
+.pmd-btn:hover,
+.pmd-btn:focus-visible {
+  opacity: 0.85;
+}
+
+.pmd-btn--primary {
+  background: var(--pmd-btn-bg);
+  color: var(--pmd-btn-text);
+}
+
+.pmd-btn--secondary {
+  background: transparent;
+  color: var(--pmd-btn-bg);
+}
+
+.pmd-section--dark .pmd-btn--primary {
+  background: var(--pmd-btn-text);
+  color: var(--pmd-btn-bg);
+  border-color: var(--pmd-btn-text);
+}
+
+.pmd-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.pmd-section--center .pmd-cta-row {
+  justify-content: center;
+}
+
+/* Hero */
+.pmd-hero {
+  text-align: center;
+  border-bottom: 1px solid var(--pmd-border);
+}
+
+.pmd-hero__highlight {
+  color: var(--pmd-sale);
+}
+
+.pmd-code-box {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--pmd-text);
+  margin: 24px 0 16px;
+  max-width: 100%;
+}
+
+.pmd-code-box__code {
+  padding: 14px 24px;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pmd-code-box__btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--pmd-text);
+  color: var(--pmd-bg);
+  border: none;
+  border-radius: 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.pmd-code-box__btn:hover,
+.pmd-code-box__btn:focus-visible {
+  opacity: 0.85;
+}
+
+.pmd-code-box__btn[data-pmd-copied="true"] {
+  background: var(--pmd-sale);
+}
+
+.pmd-deadline {
+  font-size: 14px;
+  margin: 0 0 32px;
+  letter-spacing: 0.025em;
+}
+
+/* Hvordan-bruke (3 trinn) */
+.pmd-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 750px) {
+  .pmd-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+.pmd-step {
+  border: 1px solid var(--pmd-border);
+  padding: 32px 24px;
+}
+
+.pmd-step__num {
+  font-size: 32px;
+  font-weight: 300;
+  letter-spacing: 0.025em;
+  margin: 0 0 12px;
+  color: var(--pmd-text);
+}
+
+.pmd-step__title {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0 0 8px;
+}
+
+.pmd-step__body {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* Featured produktrad */
+.pmd-products {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 750px) {
+  .pmd-products {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+.pmd-product {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--pmd-border);
+  background: var(--pmd-bg);
+  transition: opacity 0.2s ease;
+}
+
+.pmd-product:hover,
+.pmd-product:focus-visible {
+  opacity: 0.9;
+}
+
+.pmd-product__media {
+  aspect-ratio: 1 / 1;
+  background: var(--pmd-bg-soft);
+  overflow: hidden;
+}
+
+.pmd-product__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pmd-product__body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pmd-product__title {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: 0.015em;
+}
+
+.pmd-product__price {
+  font-size: 15px;
+  margin: 0;
+}
+
+.pmd-product__discount-note {
+  font-size: 13px;
+  margin: 4px 0 0;
+  color: var(--pmd-text);
+  opacity: 0.7;
+}
+
+/* Kollesksjonsblokk (tygg + hjernetrim) */
+.pmd-collection-block {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+@media (min-width: 990px) {
+  .pmd-collection-block {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+  .pmd-collection-block--reverse .pmd-collection-block__text {
+    order: 2;
+  }
+}
+
+.pmd-collection-block__text .pmd-h2 {
+  margin-bottom: 20px;
+}
+
+/* FAQ */
+.pmd-faq {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.pmd-faq__item {
+  border-top: 1px solid var(--pmd-border);
+  padding: 0;
+}
+
+.pmd-faq__item:last-child {
+  border-bottom: 1px solid var(--pmd-border);
+}
+
+.pmd-faq__item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 20px 32px 20px 0;
+  font-size: 17px;
+  font-weight: 400;
+  position: relative;
+}
+
+.pmd-faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.pmd-faq__item summary::after {
+  content: '+';
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+  font-weight: 300;
+  transition: transform 0.2s ease;
+}
+
+.pmd-faq__item[open] summary::after {
+  content: '−';
+}
+
+.pmd-faq__answer {
+  padding: 0 0 20px;
+  margin: 0;
+  font-size: 15px;
+  max-width: 65ch;
+}
+
+/* Avsluttende takk-blokk */
+.pmd-section--dark .pmd-h2 {
+  color: var(--pmd-btn-text);
+}
+
+.pmd-section--dark .pmd-deadline,
+.pmd-section--dark .pmd-lead {
+  color: var(--pmd-btn-text);
+  opacity: 0.85;
+}
+
+.pmd-section--dark .pmd-code-box {
+  border-color: var(--pmd-btn-text);
+}
+
+.pmd-section--dark .pmd-code-box__code {
+  color: var(--pmd-btn-text);
+}
+
+.pmd-section--dark .pmd-code-box__btn {
+  background: var(--pmd-btn-text);
+  color: var(--pmd-btn-bg);
+}
+
+/* Marked-melding (ikke-NO) */
+.pmd-market-block {
+  text-align: center;
+  padding: clamp(80px, 12vw, 140px) 16px;
+  border-top: 1px solid var(--pmd-border);
+  border-bottom: 1px solid var(--pmd-border);
+}
+
+/* Tilgjengelighet */
+.pmd-page :focus-visible {
+  outline: 2px solid var(--pmd-sale);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pmd-page * {
+    transition: none !important;
+  }
+}
