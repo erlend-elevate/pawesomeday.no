@@ -17,6 +17,7 @@
   assign campaign_deadline_text = 'til og med 17. mai'
   assign campaign_eyebrow = 'KUNDEKLUBB-EKSKLUSIVT'
 
+  assign campaign_collection_handle = '17-mai-i-kampanje-for-nyhetsbrev-og-kundeklubb'
   assign tygg_handle = 'alt-av-tygg'
   assign tygg_count = 21
   assign hjernetrim_handle = 'alle-hjernetrims-og-aktiviseringsleker'
@@ -26,12 +27,15 @@
   assign featured_handles_str = 'frysetorket-okse-pizzle-naturlig-og-langvarig-tygg-til-hund,pawesomeday-slowfeeder-slowfeeder-til-hund,hjerte-slowfeeder-lickmat'
   assign featured_handles = featured_handles_str | split: ','
 
+  assign campaign_path = '/collections/' | append: campaign_collection_handle
   assign tygg_path = '/collections/' | append: tygg_handle
   assign hjernetrim_path = '/collections/' | append: hjernetrim_handle | append: hjernetrim_query
 
+  assign campaign_redirect = campaign_path | url_encode
   assign tygg_redirect = tygg_path | url_encode
   assign hjernetrim_redirect = hjernetrim_path | url_encode
 
+  assign campaign_cta = '/discount/' | append: campaign_code | append: '?redirect=' | append: campaign_redirect
   assign tygg_cta = '/discount/' | append: campaign_code | append: '?redirect=' | append: tygg_redirect
   assign hjernetrim_cta = '/discount/' | append: campaign_code | append: '?redirect=' | append: hjernetrim_redirect
 
@@ -50,7 +54,7 @@
     --pmd-btn-bg: #111111;
     --pmd-btn-text: #FFFFFF;
     --pmd-border: #E8E8E1;
-    --pmd-sale: #C20000;
+    --pmd-accent: #B8860B;
     --pmd-bg-soft: #F8F7F3;
     --pmd-container: 1200px;
     color: var(--pmd-text);
@@ -129,15 +133,35 @@
   .pmd-btn:hover, .pmd-btn:focus-visible { opacity: 0.85; }
   .pmd-btn--primary { background: var(--pmd-btn-bg); color: var(--pmd-btn-text); }
   .pmd-btn--secondary { background: transparent; color: var(--pmd-btn-bg); }
+  .pmd-page a.pmd-btn,
+  .pmd-page a.pmd-btn:visited,
+  .pmd-page a.pmd-btn:hover,
+  .pmd-page a.pmd-btn:focus,
+  .pmd-page a.pmd-btn:active { text-decoration: none; }
+  .pmd-page a.pmd-btn--primary,
+  .pmd-page a.pmd-btn--primary:visited,
+  .pmd-page a.pmd-btn--primary:hover,
+  .pmd-page a.pmd-btn--primary:focus,
+  .pmd-page a.pmd-btn--primary:active { color: #FFFFFF !important; }
+  .pmd-page a.pmd-btn--secondary,
+  .pmd-page a.pmd-btn--secondary:visited,
+  .pmd-page a.pmd-btn--secondary:hover,
+  .pmd-page a.pmd-btn--secondary:focus,
+  .pmd-page a.pmd-btn--secondary:active { color: #111111 !important; }
   .pmd-section--dark .pmd-btn--primary {
     background: var(--pmd-btn-text);
     color: var(--pmd-btn-bg);
     border-color: var(--pmd-btn-text);
   }
+  .pmd-page .pmd-section--dark a.pmd-btn--primary,
+  .pmd-page .pmd-section--dark a.pmd-btn--primary:visited,
+  .pmd-page .pmd-section--dark a.pmd-btn--primary:hover,
+  .pmd-page .pmd-section--dark a.pmd-btn--primary:focus,
+  .pmd-page .pmd-section--dark a.pmd-btn--primary:active { color: #111111 !important; }
   .pmd-cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
   .pmd-section--center .pmd-cta-row { justify-content: center; }
   .pmd-hero { text-align: center; border-bottom: 1px solid var(--pmd-border); }
-  .pmd-hero__highlight { color: var(--pmd-sale); }
+  .pmd-hero__highlight { color: var(--pmd-accent); }
   .pmd-code-box {
     display: inline-flex;
     align-items: stretch;
@@ -170,7 +194,7 @@
     white-space: nowrap;
   }
   .pmd-code-box__btn:hover, .pmd-code-box__btn:focus-visible { opacity: 0.85; }
-  .pmd-code-box__btn[data-pmd-copied="true"] { background: var(--pmd-sale); }
+  .pmd-code-box__btn[data-pmd-copied="true"] { background: var(--pmd-accent); }
   .pmd-deadline { font-size: 14px; margin: 0 0 32px; letter-spacing: 0.025em; }
   .pmd-steps { display: grid; grid-template-columns: 1fr; gap: 24px; }
   @media (min-width: 750px) {
@@ -278,7 +302,7 @@
     border-top: 1px solid var(--pmd-border);
     border-bottom: 1px solid var(--pmd-border);
   }
-  .pmd-page :focus-visible { outline: 2px solid var(--pmd-sale); outline-offset: 2px; }
+  .pmd-page :focus-visible { outline: 2px solid var(--pmd-accent); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) {
     .pmd-page * { transition: none !important; }
   }
@@ -315,8 +339,7 @@
       <p class="pmd-deadline">Gyldig {{ campaign_deadline_text }}</p>
 
       <div class="pmd-cta-row" style="justify-content:center;">
-        <a href="{{ tygg_cta }}" class="pmd-btn pmd-btn--primary">Se alt av tygg</a>
-        <a href="{{ hjernetrim_cta }}" class="pmd-btn pmd-btn--secondary">Se hjernetrim</a>
+        <a href="{{ campaign_cta }}" class="pmd-btn pmd-btn--primary">Se alle 17. mai-tilbud</a>
       </div>
     </div>
   </section>
@@ -511,7 +534,7 @@
       </div>
 
       <div class="pmd-cta-row" style="justify-content:center;margin-top:8px;">
-        <a href="{{ tygg_cta }}" class="pmd-btn pmd-btn--primary">Handle nå</a>
+        <a href="{{ campaign_cta }}" class="pmd-btn pmd-btn--primary">Handle nå</a>
       </div>
     </div>
   </section>
