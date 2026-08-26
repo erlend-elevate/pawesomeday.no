@@ -1,0 +1,655 @@
+{%- comment -%}
+  MUSH Treats landingsside — priser, lagerstatus og bilder hentes live fra Shopify.
+  Endre aldri priser her: de leses fra produktene selv.
+{%- endcomment -%}
+
+{%- liquid
+  assign bundle_handle = 'mush-treats-treningspakke'
+  assign collection_handle = 'mush-treats-frysetorkede-godbiter'
+  assign collection_query = '?filter.v.availability=1'
+  assign free_shipping_threshold = 249
+
+  assign flavor_handles_str = 'mush-treats-frysetorket-storfe,mush-treats-frysetorket-lam,mush-treats-frysetorket-kylling,mush-treats-frysetorket-svin'
+  assign flavor_handles = flavor_handles_str | split: ','
+
+  assign flavor_names_str = 'Storfe,Lam,Kylling,Svin'
+  assign flavor_names = flavor_names_str | split: ','
+
+  assign flavor_descs_str = 'Klassisk og næringsrik. Høyt proteininnhold og god smak hunden vil jobbe for.|Skånsom proteinkilde for sensitiv mage. Rik på B-vitaminer og sink.|Mild og lettfordøyelig. Fungerer godt som første treningsgodbit eller for kresne hunder.|Smakfull og aromatisk. For hunder som trenger litt ekstra motivasjon i treningsøkten.'
+  assign flavor_descs = flavor_descs_str | split: '|'
+
+  assign bundle = all_products[bundle_handle]
+  assign bundle_price = bundle.price | divided_by: 100
+  assign bundle_compare = bundle.compare_at_price | divided_by: 100
+
+  assign has_discount = false
+  if bundle.compare_at_price > bundle.price
+    assign has_discount = true
+    assign savings_amount = bundle_compare | minus: bundle_price
+    assign savings_pct = savings_amount | times: 100.0 | divided_by: bundle_compare | round
+  endif
+
+  assign collection_path = '/collections/' | append: collection_handle | append: collection_query
+  assign bundle_path = '/products/' | append: bundle_handle
+
+  assign lowest_price = 0
+  for handle in flavor_handles
+    assign fp = all_products[handle].price | divided_by: 100
+    if lowest_price == 0 or fp < lowest_price
+      assign lowest_price = fp
+    endif
+  endfor
+-%}
+
+<style>
+  .mt-page {
+    --mt-cream: #f5f2ec;
+    --mt-ink: #1a1a1a;
+    --mt-muted: #6b6b6b;
+    --mt-line: #e0dbd0;
+    --mt-accent: #8b4a3a;
+    --mt-accent-dark: #6f3a2d;
+    --mt-gold: #d4aa5a;
+    --mt-dark: #1c1c1a;
+    --mt-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+    --mt-body: "Nunito", -apple-system, system-ui, sans-serif;
+    font-family: var(--mt-body);
+    color: var(--mt-ink);
+    line-height: 1.6;
+  }
+  .mt-page * { box-sizing: border-box; }
+
+  .mt-section { padding: 80px 24px; max-width: 1200px; margin: 0 auto; }
+  .mt-section-cream { background: var(--mt-cream); margin: 0; }
+  .mt-section-cream-inner { max-width: 1200px; margin: 0 auto; padding: 80px 24px; }
+  .mt-section-dark { background: var(--mt-dark); color: #fff; margin: 0; }
+  .mt-section-dark-inner { max-width: 1200px; margin: 0 auto; padding: 80px 24px; }
+
+  .mt-eyebrow {
+    text-align: center; font-size: 12px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--mt-accent);
+    font-weight: 700; margin: 0 0 18px;
+  }
+  .mt-section-dark .mt-eyebrow { color: var(--mt-gold); }
+
+  .mt-h2 {
+    font-family: var(--mt-display); font-size: clamp(32px, 5vw, 48px);
+    font-weight: 400; line-height: 1.1; text-align: center;
+    margin: 0 0 28px; color: inherit;
+  }
+  .mt-section-dark .mt-h2 { color: #fff; }
+
+  .mt-lead {
+    text-align: center; font-size: 17px; line-height: 1.7;
+    color: #2a2a2a; max-width: 720px; margin: 0 auto;
+  }
+
+  /* HERO */
+  .mt-hero {
+    position: relative; background: var(--mt-dark);
+    overflow: hidden; color: #fff; margin: 0;
+  }
+  .mt-hero-video-wrap { position: relative; width: 100%; background: #000; }
+  .mt-hero-video {
+    width: 100%; height: auto; display: block;
+    max-height: 80vh; object-fit: cover;
+  }
+  .mt-hero-content {
+    text-align: center; padding: 48px 24px 64px;
+    max-width: 880px; margin: 0 auto;
+  }
+  .mt-hero-eyebrow {
+    font-size: 12px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--mt-gold); font-weight: 700; margin: 0 0 22px;
+  }
+  .mt-hero-title {
+    font-family: var(--mt-display); font-size: clamp(36px, 6vw, 56px);
+    font-weight: 400; line-height: 1.1; margin: 0 0 24px; color: #fff;
+  }
+  .mt-hero-title em { font-style: italic; color: var(--mt-gold); }
+  .mt-hero-lead {
+    font-size: 18px; line-height: 1.6; color: #e0e0e0;
+    margin: 0 auto 20px; max-width: 640px;
+  }
+  .mt-hero-price {
+    font-family: var(--mt-display); font-size: 24px;
+    color: var(--mt-gold); margin: 0 0 32px;
+  }
+  .mt-hero-cta {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 16px 32px; background: var(--mt-gold); color: var(--mt-dark);
+    border-radius: 100px; font-size: 15px; font-weight: 700;
+    text-decoration: none; transition: all 0.2s ease; letter-spacing: 0.02em;
+  }
+  .mt-hero-cta:hover { transform: translateY(-2px); background: #c89a48; }
+  .mt-page a.mt-hero-cta,
+  .mt-page a.mt-hero-cta:visited,
+  .mt-page a.mt-hero-cta:hover,
+  .mt-page a.mt-hero-cta:focus,
+  .mt-page a.mt-hero-cta:active { color: var(--mt-dark) !important; text-decoration: none; }
+
+  /* STORY */
+  .mt-story { max-width: 880px; margin: 0 auto; text-align: center; }
+  .mt-story p {
+    font-size: 18px; line-height: 1.75; color: #2a2a2a; margin: 0 0 22px;
+  }
+  .mt-story p:last-child { margin-bottom: 0; }
+  .mt-story p strong { color: var(--mt-ink); font-weight: 700; }
+
+  /* PRODUCTS GRID */
+  .mt-products-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 20px; max-width: 1200px; margin: 32px auto 0;
+  }
+  .mt-card {
+    display: flex; flex-direction: column; background: #fff;
+    border: 1px solid var(--mt-line); border-radius: 12px;
+    overflow: hidden; text-decoration: none; color: inherit;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+  }
+  .mt-card:hover {
+    transform: translateY(-4px); border-color: var(--mt-accent);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  }
+  .mt-card-img {
+    width: 100%; aspect-ratio: 1 / 1; background: #f9f7f3; overflow: hidden;
+  }
+  .mt-card-img img {
+    width: 100%; height: 100%; object-fit: contain; padding: 12px; display: block;
+  }
+  .mt-card-body {
+    display: flex; flex-direction: column; flex: 1; padding: 20px 18px;
+  }
+  .mt-card-name {
+    font-family: var(--mt-display); font-size: 22px; font-weight: 400;
+    line-height: 1.2; margin: 0 0 8px; color: var(--mt-ink);
+  }
+  .mt-card-desc {
+    font-size: 13px; line-height: 1.5; color: #2a2a2a; margin: 0 0 14px;
+  }
+  .mt-card-bottom {
+    margin-top: auto; padding-top: 12px; border-top: 1px solid var(--mt-line);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .mt-card-price {
+    font-family: var(--mt-display); font-size: 22px; color: var(--mt-ink);
+  }
+  .mt-card-cta {
+    font-size: 13px; font-weight: 700; color: var(--mt-accent);
+  }
+  .mt-card-soldout {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--mt-ink); color: #fff;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* TREAT & TRAIN BLOCK */
+  .mt-tt-block {
+    background: var(--mt-cream); border-radius: 16px;
+    padding: 56px 40px; max-width: 1080px;
+    margin: 32px auto 0; text-align: center;
+  }
+  .mt-tt-icon { font-size: 48px; margin: 0 0 20px; line-height: 1; }
+  .mt-tt-title {
+    font-family: var(--mt-display); font-size: 30px; font-weight: 400;
+    line-height: 1.2; margin: 0 0 18px; color: var(--mt-ink);
+  }
+  .mt-tt-text {
+    font-size: 16px; line-height: 1.7; color: #2a2a2a;
+    margin: 0 auto; max-width: 720px;
+  }
+
+  /* USE CASES */
+  .mt-usecases {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 900px; margin: 48px auto 0;
+  }
+  .mt-usecase { text-align: center; }
+  .mt-usecase-icon { font-size: 32px; margin: 0 0 14px; line-height: 1; }
+  .mt-usecase-title {
+    font-family: var(--mt-display); font-size: 22px; font-weight: 400;
+    margin: 0 0 10px; color: var(--mt-ink);
+  }
+  .mt-usecase-desc {
+    font-size: 14px; line-height: 1.6; color: #2a2a2a; margin: 0;
+  }
+
+  /* USPs */
+  .mt-usps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 32px 40px; max-width: 1080px; margin: 48px auto 0;
+  }
+  .mt-usp-icon { font-size: 28px; margin: 0 0 14px; line-height: 1; }
+  .mt-usp-title {
+    font-family: var(--mt-display); font-size: 22px; font-weight: 400;
+    margin: 0 0 8px; color: #fff;
+  }
+  .mt-usp-desc {
+    font-size: 14px; line-height: 1.6; color: #d4d4d4; margin: 0;
+  }
+
+  /* FINAL CTA */
+  .mt-final { text-align: center; max-width: 720px; margin: 0 auto; }
+  .mt-final p {
+    font-size: 17px; line-height: 1.7; color: #2a2a2a; margin: 0 0 32px;
+  }
+  .mt-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 16px 28px; border-radius: 100px;
+    font-size: 15px; font-weight: 700; text-decoration: none;
+    transition: all 0.2s ease; letter-spacing: 0.02em;
+  }
+  .mt-btn-primary { background: var(--mt-accent); color: #fff; }
+  .mt-btn-primary:hover {
+    background: var(--mt-accent-dark); transform: translateY(-2px);
+  }
+  .mt-page a.mt-btn-primary,
+  .mt-page a.mt-btn-primary:visited,
+  .mt-page a.mt-btn-primary:hover,
+  .mt-page a.mt-btn-primary:focus,
+  .mt-page a.mt-btn-primary:active { color: #FFFFFF !important; text-decoration: none; }
+
+  /* BUNDLE SECTION */
+  .mt-bundle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .mt-bundle-img {
+    background: #fff;
+    border: 1px solid var(--mt-line);
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+  }
+  .mt-bundle-img img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .mt-bundle-content { text-align: left; }
+  .mt-bundle-tag {
+    display: inline-block;
+    background: var(--mt-gold);
+    color: var(--mt-dark);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 18px;
+  }
+  .mt-bundle-title {
+    font-family: var(--mt-display);
+    font-size: clamp(32px, 4.5vw, 44px);
+    font-weight: 400;
+    line-height: 1.1;
+    margin: 0 0 16px;
+    color: var(--mt-ink);
+  }
+  .mt-bundle-lead {
+    font-size: 17px;
+    line-height: 1.6;
+    color: #2a2a2a;
+    margin: 0 0 22px;
+  }
+  .mt-bundle-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+  }
+  .mt-bundle-list li {
+    padding: 8px 0;
+    font-size: 15px;
+    color: #2a2a2a;
+    border-bottom: 1px solid var(--mt-line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mt-bundle-list li:last-child { border-bottom: none; }
+  .mt-bundle-list li::before {
+    content: "\2713";
+    color: var(--mt-accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .mt-bundle-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin: 0 0 8px;
+    flex-wrap: wrap;
+  }
+  .mt-bundle-price-new {
+    font-family: var(--mt-display);
+    font-size: 44px;
+    color: var(--mt-ink);
+    line-height: 1;
+  }
+  .mt-bundle-price-old {
+    font-family: var(--mt-display);
+    font-size: 22px;
+    color: var(--mt-muted);
+    text-decoration: line-through;
+  }
+  .mt-bundle-savings {
+    display: inline-block;
+    background: var(--mt-accent);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .mt-bundle-meta {
+    font-size: 13px;
+    color: var(--mt-muted);
+    margin: 8px 0 24px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 980px) {
+    .mt-products-grid { grid-template-columns: repeat(2, 1fr); }
+    .mt-usps { grid-template-columns: repeat(2, 1fr); }
+    .mt-usecases { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .mt-bundle {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .mt-bundle-img { max-width: 480px; margin: 0 auto; }
+    .mt-bundle-content { text-align: left; }
+  }
+  @media (max-width: 640px) {
+    .mt-section, .mt-section-cream-inner, .mt-section-dark-inner { padding: 56px 20px; }
+    .mt-hero-content { padding: 40px 20px 56px; }
+    .mt-products-grid { grid-template-columns: 1fr; }
+    .mt-usps, .mt-usecases { grid-template-columns: 1fr; }
+    .mt-tt-block { padding: 40px 24px; }
+    .mt-tt-title { font-size: 24px; }
+  }
+</style>
+
+<div class="mt-page">
+
+  {%- comment -%} HERO {%- endcomment -%}
+  <section class="mt-hero">
+    <div class="mt-hero-video-wrap">
+      <video
+        class="mt-hero-video"
+        autoplay
+        loop
+        muted
+        playsinline
+        webkit-playsinline="true"
+        disablepictureinpicture
+        preload="auto"
+        x-webkit-airplay="deny">
+        <source src="https://cdn.shopify.com/videos/c/o/v/7b2010d61850496db5ce5a533f71b5ca.mp4" type="video/mp4">
+        <source src="https://cdn.shopify.com/videos/c/o/v/99f8bd23f50d49eba7fa675890af9c3d.mov" type="video/quicktime">
+      </video>
+    </div>
+
+    <div class="mt-hero-content">
+      <p class="mt-hero-eyebrow">Frysetørket &bull; Kun én ingrediens &bull; 100 % naturlig</p>
+      <h1 class="mt-hero-title">MUSH Treats, <em>bygget for trening</em></h1>
+      <p class="mt-hero-lead">
+        Frysetørkede godbiter med kun én ingrediens. Perfekt størrelse for Treat &amp; Train og håndtrening. Ingen smulring, ingen kliss, bare ren motivasjon.
+      </p>
+      <p class="mt-hero-price">Fra {{ lowest_price }},-</p>
+      <a href="{{ bundle_path }}" class="mt-hero-cta">Se treningspakken →</a>
+    </div>
+  </section>
+
+  {%- comment -%} STORY {%- endcomment -%}
+  <section class="mt-section">
+    <p class="mt-eyebrow">Hvorfor MUSH Treats</p>
+    <h2 class="mt-h2">Trening krever rene godbiter</h2>
+    <div class="mt-story">
+      <p>
+        Når du trener mye, gir du mange godbiter. Hundre per økt er ikke uvanlig. Da må godbitene være <strong>rene, små og næringsrike</strong>, ikke fulle av sukker, fyllstoffer og smaksforsterkere som gir urolig mage.
+      </p>
+      <p>
+        MUSH Treats er frysetørket kjøtt i ren form. Én ingrediens per pose, ingen tilsetningsstoffer, og en størrelse som er laget for effektiv trening, enten du bruker Treat &amp; Train, godbitpose eller bare hånden.
+      </p>
+    </div>
+  </section>
+
+  {%- comment -%} BUNDLE — HOVEDPRODUKT {%- endcomment -%}
+  {%- if bundle != blank -%}
+  <section class="mt-section-cream">
+    <div class="mt-section-cream-inner">
+      <div class="mt-bundle">
+
+        <div class="mt-bundle-img">
+          {%- if bundle.featured_image -%}
+            <img src="{{ bundle.featured_image | image_url: width: 900 }}" alt="{{ bundle.title | escape }}" width="900" height="900">
+          {%- endif -%}
+        </div>
+
+        <div class="mt-bundle-content">
+          <span class="mt-bundle-tag">Treningspakken</span>
+          <h2 class="mt-bundle-title">Alle {{ flavor_handles.size }} smaker, én pakke</h2>
+          <p class="mt-bundle-lead">
+            Storfe, lam, kylling og svin. Roter mellom smaker for å holde belønningen interessant gjennom hele treningsuken.
+          </p>
+
+          <ul class="mt-bundle-list">
+            <li>1 pose av hver smak ({{ flavor_handles.size }} totalt)</li>
+            <li>Fungerer i Treat &amp; Train</li>
+            {%- if has_discount -%}
+              <li>Spar {{ savings_pct }} % sammenlignet med enkeltkjøp</li>
+            {%- endif -%}
+            {%- if bundle_price >= free_shipping_threshold -%}
+              <li>Fri frakt inkludert</li>
+            {%- endif -%}
+          </ul>
+
+          <div class="mt-bundle-price-row">
+            <span class="mt-bundle-price-new">{{ bundle_price }},-</span>
+            {%- if has_discount -%}
+              <span class="mt-bundle-price-old">{{ bundle_compare }},-</span>
+              <span class="mt-bundle-savings">Spar {{ savings_amount }} kr</span>
+            {%- endif -%}
+          </div>
+          {%- if has_discount -%}
+            <p class="mt-bundle-meta">Kjøp én pose av hver smak enkeltvis: {{ flavor_handles.size }} × {{ lowest_price }} = {{ bundle_compare }} kr</p>
+          {%- endif -%}
+
+          {%- if bundle.available -%}
+            <a href="{{ bundle_path }}" class="mt-btn mt-btn-primary">Få treningspakken →</a>
+          {%- else -%}
+            <a href="{{ collection_path }}" class="mt-btn mt-btn-primary">Se alle smaker på lager →</a>
+          {%- endif -%}
+        </div>
+
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ENKELTSMAKER {%- endcomment -%}
+  <section class="mt-section" id="produkter">
+    <p class="mt-eyebrow">Eller velg én smak</p>
+    <h2 class="mt-h2">Foretrekker du én smak?</h2>
+    <p class="mt-lead" style="margin-bottom: 16px;">
+      Alle smaker fungerer i Treat &amp; Train og har optimal størrelse for håndtrening.
+    </p>
+
+    <div class="mt-products-grid">
+      {%- for handle in flavor_handles -%}
+        {%- assign flavor = all_products[handle] -%}
+        {%- if flavor != blank -%}
+          <a href="{{ flavor.url }}" class="mt-card">
+            {%- unless flavor.available -%}
+              <span class="mt-card-soldout">Utsolgt</span>
+            {%- endunless -%}
+            <div class="mt-card-img">
+              {%- if flavor.featured_image -%}
+                <img src="{{ flavor.featured_image | image_url: width: 600 }}" alt="{{ flavor.title | escape }}" width="600" height="600" loading="lazy">
+              {%- endif -%}
+            </div>
+            <div class="mt-card-body">
+              <h3 class="mt-card-name">{{ flavor_names[forloop.index0] }}</h3>
+              <p class="mt-card-desc">{{ flavor_descs[forloop.index0] }}</p>
+              <div class="mt-card-bottom">
+                <span class="mt-card-price">{{ flavor.price | divided_by: 100 }},-</span>
+                <span class="mt-card-cta">Se produkt →</span>
+              </div>
+            </div>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="{{ collection_path }}" class="mt-btn mt-btn-primary">
+        Se alle smaker på lager →
+      </a>
+    </div>
+  </section>
+
+  {%- comment -%} TREAT & TRAIN {%- endcomment -%}
+  <section class="mt-section">
+    <p class="mt-eyebrow">Testet med Treat &amp; Train</p>
+    <h2 class="mt-h2">Perfekt i Treat &amp; Train, på hver økt</h2>
+
+    <div class="mt-tt-block">
+      <div class="mt-tt-icon">🎯</div>
+      <h3 class="mt-tt-title">Riktig størrelse, riktig konsistens</h3>
+      <p class="mt-tt-text">
+        Treat &amp; Train og lignende belønningsdispensere er kresne. Godbitene må ha rett størrelse, rett form, og ikke være for fete eller klissete. MUSH Treats er testet og fungerer uten blokkeringer, bit etter bit, gjennom hele treningsøkten.
+      </p>
+    </div>
+  </section>
+
+  {%- comment -%} USE CASES {%- endcomment -%}
+  <section class="mt-section-cream">
+    <div class="mt-section-cream-inner">
+      <p class="mt-eyebrow">Slik bruker du dem</p>
+      <h2 class="mt-h2">Tre måter å trene på</h2>
+
+      <div class="mt-usecases">
+        <div class="mt-usecase">
+          <div class="mt-usecase-icon">🎯</div>
+          <h3 class="mt-usecase-title">Treat &amp; Train</h3>
+          <p class="mt-usecase-desc">Fyll dispenseren og kjør distansetrening. Fungerer i Treat &amp; Train uten å sette seg fast.</p>
+        </div>
+        <div class="mt-usecase">
+          <div class="mt-usecase-icon">✋</div>
+          <h3 class="mt-usecase-title">Håndtrening</h3>
+          <p class="mt-usecase-desc">Perfekt størrelse for posisjonstrening, impulskontroll og markering.</p>
+        </div>
+        <div class="mt-usecase">
+          <div class="mt-usecase-icon">🧥</div>
+          <h3 class="mt-usecase-title">I lommen på tur</h3>
+          <p class="mt-usecase-desc">Tørre og smuldrer ikke. Holder formen i hele turen uavhengig av temperatur.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} USPs {%- endcomment -%}
+  <section class="mt-section-dark">
+    <div class="mt-section-dark-inner">
+      <p class="mt-eyebrow">Det som gjør MUSH Treats spesielle</p>
+      <h2 class="mt-h2">Rent, enkelt, ærlig</h2>
+
+      <div class="mt-usps">
+        <div>
+          <div class="mt-usp-icon">🥩</div>
+          <h3 class="mt-usp-title">Én ingrediens</h3>
+          <p class="mt-usp-desc">Bare kjøttet. Ingen sukker, ingen kornfyllstoffer, ingen smaksforsterkere.</p>
+        </div>
+        <div>
+          <div class="mt-usp-icon">❄️</div>
+          <h3 class="mt-usp-title">Skånsomt frysetørket</h3>
+          <p class="mt-usp-desc">Bevarer næringsstoffer, enzymer og smak nesten uendret fra ferskt kjøtt.</p>
+        </div>
+        <div>
+          <div class="mt-usp-icon">📏</div>
+          <h3 class="mt-usp-title">Rett størrelse for trening</h3>
+          <p class="mt-usp-desc">Bitene er små nok for høyfrekvent trening uten å overfôre hunden.</p>
+        </div>
+        <div>
+          <div class="mt-usp-icon">🦴</div>
+          <h3 class="mt-usp-title">Høyt proteininnhold</h3>
+          <p class="mt-usp-desc">Rent kjøtt gir typisk 70-85 % protein. Perfekt for aktive hunder.</p>
+        </div>
+        <div>
+          <div class="mt-usp-icon">🧽</div>
+          <h3 class="mt-usp-title">Ingen kliss eller smulring</h3>
+          <p class="mt-usp-desc">Tørre biter som ikke setter seg fast i dispenser, lomme eller godbitpose.</p>
+        </div>
+        <div>
+          <div class="mt-usp-icon">📦</div>
+          <h3 class="mt-usp-title">Lang holdbarhet</h3>
+          <p class="mt-usp-desc">Oppbevares tørt i romtemperatur. Trenger ikke kjøles. Fungerer på tur og konkurranse.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} FINAL CTA {%- endcomment -%}
+  <section class="mt-section-cream">
+    <div class="mt-section-cream-inner">
+      <p class="mt-eyebrow">Klar til å trene?</p>
+      <h2 class="mt-h2">Velg din første smak</h2>
+
+      <div class="mt-final">
+        <p>
+          {{ flavor_handles.size }} smaker, alle {{ lowest_price }} kr. Alle fungerer i Treat &amp; Train, alle har kun én ingrediens, alle er klare til neste treningsøkt. Fri frakt over {{ free_shipping_threshold }} kr.
+        </p>
+        <a href="{{ collection_path }}" class="mt-btn mt-btn-primary">
+          Se alle smaker på lager →
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  (function() {
+    var video = document.querySelector('.mt-hero-video');
+    if (!video) return;
+
+    var tryPlay = function() {
+      var promise = video.play();
+      if (promise !== undefined) {
+        promise.catch(function() {
+          var resumeOnInteraction = function() {
+            video.play();
+            document.removeEventListener('touchstart', resumeOnInteraction);
+            document.removeEventListener('click', resumeOnInteraction);
+            document.removeEventListener('scroll', resumeOnInteraction);
+          };
+          document.addEventListener('touchstart', resumeOnInteraction, { once: true, passive: true });
+          document.addEventListener('click', resumeOnInteraction, { once: true });
+          document.addEventListener('scroll', resumeOnInteraction, { once: true, passive: true });
+        });
+      }
+    };
+
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      video.addEventListener('loadeddata', tryPlay, { once: true });
+      video.addEventListener('canplay', tryPlay, { once: true });
+    }
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        video.play().catch(function() {});
+      }
+    });
+  })();
+</script>
