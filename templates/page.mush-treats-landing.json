@@ -1,0 +1,36 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {}
+    },
+    "advanced_content_axP7Eg": {
+      "type": "advanced-content",
+      "blocks": {
+        "liquid_3RhVjV": {
+          "type": "liquid",
+          "name": "blokk 1",
+          "settings": {
+            "code": "{% render 'mush-treats-landing' %}",
+            "width": "100%",
+            "alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "liquid_3RhVjV"
+      ],
+      "name": "t:sections.advanced-content.presets.custom_content.name",
+      "settings": {
+        "full_width": true,
+        "space_around": false,
+        "lazyload_images": false
+      }
+    }
+  },
+  "order": [
+    "main",
+    "advanced_content_axP7Eg"
+  ]
+}
