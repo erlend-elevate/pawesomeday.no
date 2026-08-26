@@ -18,6 +18,15 @@
   assign flavor_descs_str = 'Klassisk og næringsrik. Høyt proteininnhold og god smak hunden vil jobbe for.|Skånsom proteinkilde for sensitiv mage. Rik på B-vitaminer og sink.|Mild og lettfordøyelig. Fungerer godt som første treningsgodbit eller for kresne hunder.|Smakfull og aromatisk. For hunder som trenger litt ekstra motivasjon i treningsøkten.'
   assign flavor_descs = flavor_descs_str | split: '|'
 
+  assign extra_handles_str = 'mush-treats-frysetorket-kyllinghjerte,mush-treats-frysetorket-storfehjerte,mush-treats-frysetorket-svinehjerte,mush-treats-frysetorket-svinelunge'
+  assign extra_handles = extra_handles_str | split: ','
+
+  assign extra_names_str = 'kyllinghjerte,storfehjerte,svinehjerte,svinelunge'
+  assign extra_names = extra_names_str | split: ','
+
+  assign smakspakke_handle = 'mush-treats-smakspakke'
+  assign smakspakke = all_products[smakspakke_handle]
+
   assign bundle = all_products[bundle_handle]
   assign bundle_price = bundle.price | divided_by: 100
   assign bundle_compare = bundle.compare_at_price | divided_by: 100
@@ -39,6 +48,20 @@
       assign lowest_price = fp
     endif
   endfor
+
+  assign bundle_per_pose = bundle_price | times: 1.0 | divided_by: flavor_handles.size | round
+
+  assign show_smakspakke = false
+  if smakspakke != blank and smakspakke.available and lowest_price > 0
+    assign sp_price = smakspakke.price | divided_by: 100
+    assign sp_compare = smakspakke.compare_at_price | divided_by: 100
+    assign sp_count = sp_compare | divided_by: lowest_price
+    if sp_count > 0
+      assign show_smakspakke = true
+      assign sp_per_pose = sp_price | times: 1.0 | divided_by: sp_count | round
+      assign sp_path = '/products/' | append: smakspakke_handle
+    endif
+  endif
 -%}
 
 <style>
@@ -354,6 +377,62 @@
     margin: 8px 0 24px;
   }
 
+  /* SEKUNDÆRT TILBUD */
+  .mt-alt-offer {
+    max-width: 1100px;
+    margin: 56px auto 0;
+    padding-top: 44px;
+    border-top: 1px solid var(--mt-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .mt-alt-offer-text { flex: 1 1 320px; }
+  .mt-alt-offer-label {
+    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--mt-accent); font-weight: 700; margin: 0 0 10px;
+  }
+  .mt-alt-offer-title {
+    font-family: var(--mt-display); font-size: 26px; font-weight: 400;
+    line-height: 1.2; margin: 0 0 8px; color: var(--mt-ink);
+  }
+  .mt-alt-offer-desc {
+    font-size: 15px; line-height: 1.6; color: #2a2a2a; margin: 0;
+  }
+  .mt-alt-offer-desc strong { color: var(--mt-ink); font-weight: 700; }
+  .mt-alt-offer-aside {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+  }
+  .mt-alt-offer-price {
+    font-family: var(--mt-display); font-size: 34px;
+    color: var(--mt-ink); line-height: 1;
+  }
+  .mt-alt-offer-price small {
+    font-family: var(--mt-body); font-size: 14px;
+    color: var(--mt-muted); margin-left: 8px;
+  }
+  .mt-btn-secondary {
+    background: transparent; color: var(--mt-accent);
+    border: 1.5px solid var(--mt-accent);
+  }
+  .mt-btn-secondary:hover {
+    background: var(--mt-accent); transform: translateY(-2px);
+  }
+  .mt-page a.mt-btn-secondary,
+  .mt-page a.mt-btn-secondary:visited,
+  .mt-page a.mt-btn-secondary:focus,
+  .mt-page a.mt-btn-secondary:active { color: var(--mt-accent) !important; text-decoration: none; }
+  .mt-page a.mt-btn-secondary:hover { color: #FFFFFF !important; text-decoration: none; }
+
+  /* EKSTRA SMAKER */
+  .mt-extra-note {
+    text-align: center; font-size: 15px; line-height: 1.7;
+    color: var(--mt-muted); max-width: 720px; margin: 32px auto 0;
+  }
+  .mt-extra-note a { color: var(--mt-accent); font-weight: 700; }
+
   /* RESPONSIVE */
   @media (max-width: 980px) {
     .mt-products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -472,6 +551,25 @@
         </div>
 
       </div>
+
+      {%- if show_smakspakke -%}
+        <div class="mt-alt-offer">
+          <div class="mt-alt-offer-text">
+            <p class="mt-alt-offer-label">Vil du prøve alt?</p>
+            <h3 class="mt-alt-offer-title">Smakspakken, alle {{ sp_count }} smaker</h3>
+            <p class="mt-alt-offer-desc">
+              Én pose av hver smak vi fører, inkludert hjerte- og lungevariantene. Lavere pris per pose enn treningspakken: <strong>{{ sp_per_pose }} kr</strong> mot {{ bundle_per_pose }} kr.
+            </p>
+          </div>
+          <div class="mt-alt-offer-aside">
+            <span class="mt-alt-offer-price">
+              {{ sp_price }},-
+              {%- if sp_compare > sp_price -%}<small>før {{ sp_compare }},-</small>{%- endif -%}
+            </span>
+            <a href="{{ sp_path }}" class="mt-btn mt-btn-secondary">Se smakspakken →</a>
+          </div>
+        </div>
+      {%- endif -%}
     </div>
   </section>
   {%- endif -%}
@@ -509,6 +607,25 @@
         {%- endif -%}
       {%- endfor -%}
     </div>
+
+    {%- assign extra_available = '' -%}
+    {%- for handle in extra_handles -%}
+      {%- assign ex = all_products[handle] -%}
+      {%- if ex != blank and ex.available -%}
+        {%- if extra_available == blank -%}
+          {%- assign extra_available = extra_names[forloop.index0] -%}
+        {%- else -%}
+          {%- assign extra_available = extra_available | append: ', ' | append: extra_names[forloop.index0] -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if extra_available != blank -%}
+      <p class="mt-extra-note">
+        Vi fører også {{ extra_available }} til {{ lowest_price }} kr posen. Samme rene råvare, samme størrelse for trening.
+        <a href="{{ collection_path }}">Se hele utvalget</a>.
+      </p>
+    {%- endif -%}
 
     <div style="text-align: center; margin-top: 40px;">
       <a href="{{ collection_path }}" class="mt-btn mt-btn-primary">
